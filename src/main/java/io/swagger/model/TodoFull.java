@@ -7,7 +7,11 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.model.TodoBase;
 import java.time.OffsetDateTime;
+
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.validation.annotation.Validated;
+
+import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
 
@@ -18,6 +22,7 @@ import javax.validation.constraints.*;
 @Validated
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-03-15T19:21:55.765Z")
 
+@Entity
 public class TodoFull extends TodoBase  {
   @JsonProperty("id")
   private Integer id = null;
@@ -33,8 +38,9 @@ public class TodoFull extends TodoBase  {
    * maximum: 1000000
    * @return id
   **/
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
   @ApiModelProperty(required = true, value = "")
-  @NotNull
 
 @Min(0) @Max(1000000) 
   public Integer getId() {
