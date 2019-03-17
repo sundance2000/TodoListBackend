@@ -27,9 +27,19 @@ public class TodoFull extends TodoBase  {
   @JsonProperty("id")
   private Integer id = null;
 
+  public TodoFull() {
+  }
+
   public TodoFull id(Integer id) {
     this.id = id;
     return this;
+  }
+
+  public TodoFull(TodoBase todoBase) {
+    this.setTitle(todoBase.getTitle());
+    this.setDescription(todoBase.getDescription());
+    this.setDueDate(todoBase.getDueDate());
+    this.setDone(todoBase.isDone());
   }
 
   /**

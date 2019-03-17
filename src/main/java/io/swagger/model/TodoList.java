@@ -56,6 +56,13 @@ public class TodoList   {
     return this;
   }
 
+  public TodoList(TodoFull todoFull) {
+    this.setId(todoFull.getId());
+    this.setTitle(todoFull.getTitle());
+    this.setDueDate(todoFull.getDueDate());
+    this.setDone(todoFull.isDone());
+  }
+
   /**
    * Get title
    * @return title
