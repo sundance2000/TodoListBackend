@@ -31,6 +31,8 @@ public class TodoBase   {
   private OffsetDateTime dueDate = null;
 
   @JsonProperty("done")
+  @NotNull
+
   private Boolean done = null;
 
   public TodoBase title(String title) {

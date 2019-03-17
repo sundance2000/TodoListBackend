@@ -130,21 +130,14 @@ public class TodosApiControllerTest {
     @Test
     public void testCreateTodoMissingDone() throws Exception {
         // 1. Arrange
-        todoBase.setDone(false);
-        setUpTodoFull();
-        given(todoRepository.save(new TodoFull(todoBase))).willReturn(todoFull);
-        String json = "{  \"id\" : 1,  \"title\" : \"" + this.title + "\",  \"description\" : \"" + this.description + "\",  \"dueDate\" : \"" + this.dueDate + "\"}";
+        this.todoBase.setDone(null);
+        String json = this.objectMapper.writeValueAsString(todoBase);
 
         // 2. Action
         mockMvc.perform(post("/todos")
             .content(json)
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("id", is(this.id)))
-            .andExpect(jsonPath("description", is(this.description)))
-            .andExpect(jsonPath("done", is(false)))
-            .andExpect(jsonPath("dueDate", is(this.dueDate)))
-            .andExpect(jsonPath("title", is(this.title)));
+            .andExpect(status().isBadRequest());
     }
 
     @Test
