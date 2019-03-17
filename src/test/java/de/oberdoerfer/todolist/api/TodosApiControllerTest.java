@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import de.oberdoerfer.todolist.RFC3339DateFormat;
+import de.oberdoerfer.todolist.model.OffsetPageRequest;
 import de.oberdoerfer.todolist.model.TodoBase;
 import de.oberdoerfer.todolist.model.TodoFull;
 import de.oberdoerfer.todolist.model.TodoRepository;
@@ -13,6 +14,8 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,9 +23,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.text.ParseException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -79,6 +85,16 @@ public class TodosApiControllerTest {
     private void setUpTodoFull() {
         todoFull = new TodoFull(todoBase);
         todoFull.setId(id);
+    }
+
+    private TodoFull generateTodoFull(int id, Boolean done) {
+        todoFull = new TodoFull();
+        todoFull.setId(id);
+        todoFull.setDescription(this.description);
+        todoFull.setDone(done);
+        todoFull.setDueDate(getOffsetDateTime(this.dueDate));
+        todoFull.setTitle(this.title);
+        return todoFull;
     }
 
     @Autowired
@@ -251,6 +267,179 @@ public class TodosApiControllerTest {
         // 2. Action
         mockMvc.perform(get("/todos/1"))
             .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testGetTodosEmptyList() throws Exception {
+        // 1. Arrange
+        Pageable pageable = new OffsetPageRequest(5, 0);
+        PageImpl<TodoFull> page = new PageImpl<>(new ArrayList<>());
+        given(todoRepository.findAllByDone(false, pageable)).willReturn(page);
+
+        // 2. Action
+        mockMvc.perform(get("/todos/"))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void testGetTodosUnfinished() throws Exception {
+        // 1. Arrange
+        List<TodoFull> todoFullList = new ArrayList<>();
+        todoFullList.add(this.generateTodoFull(1, false));
+        todoFullList.add(this.generateTodoFull(2, false));
+        todoFullList.add(this.generateTodoFull(3, false));
+        Pageable pageable = new OffsetPageRequest(5, 0);
+        PageImpl<TodoFull> page = new PageImpl<>(todoFullList);
+        given(todoRepository.findAllByDone(false, pageable)).willReturn(page);
+
+        // 2. Action
+        mockMvc.perform(get("/todos/?state=unfinished"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(3)))
+            .andExpect(jsonPath("$[0].id", is(1)))
+            .andExpect(jsonPath("$[0].done", is(false)))
+            .andExpect(jsonPath("$[0].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[0].title", is(this.title)))
+            .andExpect(jsonPath("$[1].id", is(2)))
+            .andExpect(jsonPath("$[1].done", is(false)))
+            .andExpect(jsonPath("$[1].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[1].title", is(this.title)))
+            .andExpect(jsonPath("$[2].id", is(3)))
+            .andExpect(jsonPath("$[2].done", is(false)))
+            .andExpect(jsonPath("$[2].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[2].title", is(this.title)));
+    }
+
+    @Test
+    public void testGetTodosAll() throws Exception {
+        // 1. Arrange
+        List<TodoFull> todoFullList = new ArrayList<>();
+        todoFullList.add(this.generateTodoFull(1, false));
+        todoFullList.add(this.generateTodoFull(2, true));
+        todoFullList.add(this.generateTodoFull(3, false));
+        Pageable pageable = new OffsetPageRequest(5, 0);
+        PageImpl<TodoFull> page = new PageImpl<>(todoFullList);
+        given(todoRepository.findAll(pageable)).willReturn(page);
+
+        // 2. Action
+        mockMvc.perform(get("/todos/?state=all"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(3)))
+            .andExpect(jsonPath("$[0].id", is(1)))
+            .andExpect(jsonPath("$[0].done", is(false)))
+            .andExpect(jsonPath("$[0].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[0].title", is(this.title)))
+            .andExpect(jsonPath("$[1].id", is(2)))
+            .andExpect(jsonPath("$[1].done", is(true)))
+            .andExpect(jsonPath("$[1].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[1].title", is(this.title)))
+            .andExpect(jsonPath("$[2].id", is(3)))
+            .andExpect(jsonPath("$[2].done", is(false)))
+            .andExpect(jsonPath("$[2].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[2].title", is(this.title)));
+    }
+
+    @Test
+    public void testGetTodosNoState() throws Exception {
+        // 1. Arrange
+        List<TodoFull> todoFullList = new ArrayList<>();
+        todoFullList.add(this.generateTodoFull(1, false));
+        todoFullList.add(this.generateTodoFull(2, true));
+        todoFullList.add(this.generateTodoFull(3, false));
+        Pageable pageable = new OffsetPageRequest(5, 0);
+        PageImpl<TodoFull> page = new PageImpl<>(todoFullList);
+        given(todoRepository.findAllByDone(false, pageable)).willReturn(page);
+
+        // 2. Action
+        mockMvc.perform(get("/todos/"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(3)))
+            .andExpect(jsonPath("$[0].id", is(1)))
+            .andExpect(jsonPath("$[0].done", is(false)))
+            .andExpect(jsonPath("$[0].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[0].title", is(this.title)))
+            .andExpect(jsonPath("$[1].id", is(2)))
+            .andExpect(jsonPath("$[1].done", is(true)))
+            .andExpect(jsonPath("$[1].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[1].title", is(this.title)))
+            .andExpect(jsonPath("$[2].id", is(3)))
+            .andExpect(jsonPath("$[2].done", is(false)))
+            .andExpect(jsonPath("$[2].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[2].title", is(this.title)));
+    }
+
+    @Test
+    public void testGetTodosLimit() throws Exception {
+        // 1. Arrange
+        List<TodoFull> todoFullList = new ArrayList<>();
+        todoFullList.add(this.generateTodoFull(1, false));
+        todoFullList.add(this.generateTodoFull(2, true));
+        Pageable pageable = new OffsetPageRequest(2, 0);
+        PageImpl<TodoFull> page = new PageImpl<>(todoFullList);
+        given(todoRepository.findAllByDone(false, pageable)).willReturn(page);
+
+        // 2. Action
+        mockMvc.perform(get("/todos/?limit=2"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[0].id", is(1)))
+            .andExpect(jsonPath("$[0].done", is(false)))
+            .andExpect(jsonPath("$[0].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[0].title", is(this.title)))
+            .andExpect(jsonPath("$[1].id", is(2)))
+            .andExpect(jsonPath("$[1].done", is(true)))
+            .andExpect(jsonPath("$[1].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[1].title", is(this.title)));
+
+    }
+
+    @Test
+    public void testGetTodosOffset() throws Exception {
+        // 1. Arrange
+        List<TodoFull> todoFullList = new ArrayList<>();
+        todoFullList.add(this.generateTodoFull(2, true));
+        todoFullList.add(this.generateTodoFull(3, false));
+        Pageable pageable = new OffsetPageRequest(5, 1);
+        PageImpl<TodoFull> page = new PageImpl<>(todoFullList);
+        given(todoRepository.findAllByDone(false, pageable)).willReturn(page);
+
+        // 2. Action
+        mockMvc.perform(get("/todos/?offset=1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[0].id", is(2)))
+            .andExpect(jsonPath("$[0].done", is(true)))
+            .andExpect(jsonPath("$[0].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[0].title", is(this.title)))
+            .andExpect(jsonPath("$[1].id", is(3)))
+            .andExpect(jsonPath("$[1].done", is(false)))
+            .andExpect(jsonPath("$[1].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[1].title", is(this.title)));
+
+    }
+
+    @Test
+    public void testGetTodosRemaining() throws Exception {
+        // 1. Arrange
+        List<TodoFull> todoFullList = new ArrayList<>();
+        todoFullList.add(this.generateTodoFull(1, false));
+        todoFullList.add(this.generateTodoFull(2, true));
+        Pageable pageable = new OffsetPageRequest(2, 0);
+        PageImpl<TodoFull> page = new PageImpl<>(todoFullList, pageable, 3);
+        given(todoRepository.findAllByDone(false, pageable)).willReturn(page);
+
+        // 2. Action
+        mockMvc.perform(get("/todos/?limit=2"))
+            .andExpect(status().isPartialContent())
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[0].id", is(1)))
+            .andExpect(jsonPath("$[0].done", is(false)))
+            .andExpect(jsonPath("$[0].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[0].title", is(this.title)))
+            .andExpect(jsonPath("$[1].id", is(2)))
+            .andExpect(jsonPath("$[1].done", is(true)))
+            .andExpect(jsonPath("$[1].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[1].title", is(this.title)));
     }
 
 }
