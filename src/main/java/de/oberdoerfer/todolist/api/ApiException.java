@@ -1,4 +1,4 @@
-package io.swagger.api;
+package de.oberdoerfer.todolist.api;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-03-15T19:21:55.765Z")
 

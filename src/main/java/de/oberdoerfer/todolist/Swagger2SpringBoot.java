@@ -1,4 +1,4 @@
-package io.swagger;
+package de.oberdoerfer.todolist;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.ExitCodeGenerator;
@@ -9,7 +9,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication
 @EnableSwagger2
-@ComponentScan(basePackages = { "io.swagger", "io.swagger.api" , "io.swagger.configuration"})
+@ComponentScan(basePackages = { "de.oberdoerfer.todolist", "de.oberdoerfer.todolist.api" , "de.oberdoerfer.todolist.configuration", "de.oberdoerfer.todolist.model", "de.oberdoerfer.todolist.service"})
 public class Swagger2SpringBoot implements CommandLineRunner {
 
     @Override

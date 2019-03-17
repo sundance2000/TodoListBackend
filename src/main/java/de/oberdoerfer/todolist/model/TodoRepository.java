@@ -1,4 +1,4 @@
-package io.swagger.model;
+package de.oberdoerfer.todolist.model;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;

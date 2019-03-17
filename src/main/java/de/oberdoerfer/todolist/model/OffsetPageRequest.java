@@ -1,4 +1,4 @@
-package io.swagger.model;
+package de.oberdoerfer.todolist.model;
 
 import org.springframework.data.domain.PageRequest;
 
@@ -10,7 +10,7 @@ public class OffsetPageRequest extends PageRequest {
 
     private final int offset;
 
-    OffsetPageRequest(int limit, int offset) {
+    public OffsetPageRequest(int limit, int offset) {
         super(0, limit);
         this.offset = offset;
     }

@@ -1,4 +1,4 @@
-package io.swagger.api;
+package de.oberdoerfer.todolist.api;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletResponse;

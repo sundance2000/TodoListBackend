@@ -1,31 +1,28 @@
-package io.swagger.model;
+package de.oberdoerfer.todolist.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.springframework.validation.annotation.Validated;
 
-import javax.persistence.MappedSuperclass;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 
 /**
- * A base todo used for creation and modification.
+ * A reduced todo with identifier used as response object for the todo list.
  */
-@ApiModel(description = "A base todo used for creation and modification.")
+@ApiModel(description = "A reduced todo with identifier used as response object for the todo list.")
 @Validated
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-03-15T19:21:55.765Z")
 
-@MappedSuperclass
-public class TodoBase   {
+public class TodoList   {
+  @JsonProperty("id")
+  private Integer id = null;
+
   @JsonProperty("title")
   private String title = null;
-
-  @JsonProperty("description")
-  private String description = null;
 
   @JsonProperty("dueDate")
   private OffsetDateTime dueDate = null;
@@ -33,9 +30,37 @@ public class TodoBase   {
   @JsonProperty("done")
   private Boolean done = null;
 
-  public TodoBase title(String title) {
+  public TodoList id(Integer id) {
+    this.id = id;
+    return this;
+  }
+
+  /**
+   * Get id
+   * @return id
+  **/
+  @ApiModelProperty(required = true, value = "")
+  @NotNull
+
+
+  public Integer getId() {
+    return id;
+  }
+
+  public void setId(Integer id) {
+    this.id = id;
+  }
+
+  public TodoList title(String title) {
     this.title = title;
     return this;
+  }
+
+  public TodoList(TodoFull todoFull) {
+    this.setId(todoFull.getId());
+    this.setTitle(todoFull.getTitle());
+    this.setDueDate(todoFull.getDueDate());
+    this.setDone(todoFull.isDone());
   }
 
   /**
@@ -45,7 +70,7 @@ public class TodoBase   {
   @ApiModelProperty(required = true, value = "")
   @NotNull
 
-@Size(min=1,max=30) 
+
   public String getTitle() {
     return title;
   }
@@ -54,27 +79,7 @@ public class TodoBase   {
     this.title = title;
   }
 
-  public TodoBase description(String description) {
-    this.description = description;
-    return this;
-  }
-
-  /**
-   * Get description
-   * @return description
-  **/
-  @ApiModelProperty(value = "")
-
-@Size(max=500) 
-  public String getDescription() {
-    return description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public TodoBase dueDate(OffsetDateTime dueDate) {
+  public TodoList dueDate(OffsetDateTime dueDate) {
     this.dueDate = dueDate;
     return this;
   }
@@ -96,7 +101,7 @@ public class TodoBase   {
     this.dueDate = dueDate;
   }
 
-  public TodoBase done(Boolean done) {
+  public TodoList done(Boolean done) {
     this.done = done;
     return this;
   }
@@ -126,25 +131,25 @@ public class TodoBase   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    TodoBase todoBase = (TodoBase) o;
-    return Objects.equals(this.title, todoBase.title) &&
-        Objects.equals(this.description, todoBase.description) &&
-        Objects.equals(this.dueDate, todoBase.dueDate) &&
-        Objects.equals(this.done, todoBase.done);
+    TodoList todoList = (TodoList) o;
+    return Objects.equals(this.id, todoList.id) &&
+        Objects.equals(this.title, todoList.title) &&
+        Objects.equals(this.dueDate, todoList.dueDate) &&
+        Objects.equals(this.done, todoList.done);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(title, description, dueDate, done);
+    return Objects.hash(id, title, dueDate, done);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class TodoBase {\n");
+    sb.append("class TodoList {\n");
     
+    sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    title: ").append(toIndentedString(title)).append("\n");
-    sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    dueDate: ").append(toIndentedString(dueDate)).append("\n");
     sb.append("    done: ").append(toIndentedString(done)).append("\n");
     sb.append("}");

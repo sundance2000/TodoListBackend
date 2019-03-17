@@ -3,14 +3,14 @@
  * https://github.com/swagger-api/swagger-codegen
  * Do not edit the class manually.
  */
-package io.swagger.api;
+package de.oberdoerfer.todolist.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
-import io.swagger.model.ErrorResponse;
-import io.swagger.model.TodoBase;
-import io.swagger.model.TodoFull;
-import io.swagger.model.TodoList;
+import de.oberdoerfer.todolist.model.ErrorResponse;
+import de.oberdoerfer.todolist.model.TodoBase;
+import de.oberdoerfer.todolist.model.TodoFull;
+import de.oberdoerfer.todolist.model.TodoList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

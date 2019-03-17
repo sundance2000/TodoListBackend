@@ -1,6 +1,7 @@
-package io.swagger.model;
+package de.oberdoerfer.todolist.service;
 
 import com.google.common.collect.Maps;
+import de.oberdoerfer.todolist.model.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
