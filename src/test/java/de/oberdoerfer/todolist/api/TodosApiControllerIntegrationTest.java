@@ -25,8 +25,8 @@ import java.util.Date;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -241,6 +241,30 @@ public class TodosApiControllerIntegrationTest {
     public void testDeleteTodoNotExisting() throws Exception {
         // 2. Action
         mockMvc.perform(delete("/todos/999"))
+            .andExpect(status().isNotFound());
+    }
+
+    // Get
+
+    @Test
+    public void testGetTodo() throws Exception {
+        // 1. Arrange
+        int id = this.create();
+
+        // 2. Action
+        mockMvc.perform(get("/todos/" + id))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("id", is(id)))
+            .andExpect(jsonPath("description", is(this.description)))
+            .andExpect(jsonPath("done", is(this.done)))
+            .andExpect(jsonPath("dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("title", is(this.title)));
+    }
+
+    @Test
+    public void testGetTodoNotExisting() throws Exception {
+        // 2. Action
+        mockMvc.perform(get("/todos/999"))
             .andExpect(status().isNotFound());
     }
 
