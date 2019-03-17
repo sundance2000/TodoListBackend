@@ -130,24 +130,27 @@ public class TodosApiControllerTest {
     @Test
     public void testCreateTodoMissingDone() throws Exception {
         // 1. Arrange
-        this.todoBase.setDone(null);
-        this.setUpTodoFull();
+        todoBase.setDone(false);
+        setUpTodoFull();
         given(todoRepository.save(new TodoFull(todoBase))).willReturn(todoFull);
-        String json = this.objectMapper.writeValueAsString(todoBase);
+        String json = "{  \"id\" : 1,  \"title\" : \"" + this.title + "\",  \"description\" : \"" + this.description + "\",  \"dueDate\" : \"" + this.dueDate + "\"}";
 
         // 2. Action
         mockMvc.perform(post("/todos")
             .content(json)
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("id", is(this.id)))
+            .andExpect(jsonPath("description", is(this.description)))
+            .andExpect(jsonPath("done", is(false)))
+            .andExpect(jsonPath("dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("title", is(this.title)));
     }
 
     @Test
     public void testCreateTodoMissingDueDate() throws Exception {
         // 1. Arrange
         this.todoBase.setDueDate(null);
-        this.setUpTodoFull();
-        given(todoRepository.save(new TodoFull(todoBase))).willReturn(todoFull);
         String json = this.objectMapper.writeValueAsString(todoBase);
 
         // 2. Action
@@ -160,7 +163,7 @@ public class TodosApiControllerTest {
     @Test
     public void testCreateTodoInvalidDate() throws Exception {
         // 1. Arrange
-        String json = "{  \"title\" : \"clean fridge\",  \"description\" : \"It's a mess\",  \"dueDate\" : \"test\",  \"done\" : false}";
+        String json = "{  \"id\" : 1,  \"title\" : \"" + this.title + "\",  \"description\" : \"" + this.description + "\",  \"dueDate\" : \"test\",  \"done\" : " + this.done + "}";
 
         // 2. Action
         mockMvc.perform(post("/todos")
@@ -173,8 +176,6 @@ public class TodosApiControllerTest {
     public void testCreateTodoMissingTitle() throws Exception {
         // 1. Arrange
         this.todoBase.setTitle(null);
-        this.setUpTodoFull();
-        given(todoRepository.save(new TodoFull(todoBase))).willReturn(todoFull);
         String json = this.objectMapper.writeValueAsString(todoBase);
 
         // 2. Action
@@ -188,8 +189,6 @@ public class TodosApiControllerTest {
     public void testCreateTodoTitleTooShort() throws Exception {
         // 1. Arrange
         this.todoBase.setTitle("");
-        this.setUpTodoFull();
-        given(todoRepository.save(new TodoFull(todoBase))).willReturn(todoFull);
         String json = this.objectMapper.writeValueAsString(todoBase);
 
         // 2. Action
@@ -203,8 +202,6 @@ public class TodosApiControllerTest {
     public void testCreateTodoTitleTooLong() throws Exception {
         // 1. Arrange
         this.todoBase.setTitle("1234567890123456789012345678901");
-        this.setUpTodoFull();
-        given(todoRepository.save(new TodoFull(todoBase))).willReturn(todoFull);
         String json = this.objectMapper.writeValueAsString(todoBase);
 
         // 2. Action

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
+import javax.validation.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -92,6 +92,9 @@ public class TodosApiController implements TodosApi {
 
     @Override
     public ResponseEntity<TodoFull> createTodo(@Valid @RequestBody TodoBase body) {
+        if (body.isDone() == null) {
+            body.setDone(false);
+        }
         return new ResponseEntity<TodoFull>(this.todoRepository.save(new TodoFull(body)), HttpStatus.CREATED);
     }
 
