@@ -38,6 +38,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(TodosApiController.class)
 public class TodosApiControllerTest {
 
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private TodoRepository todoRepository;
+
     private ObjectMapper objectMapper;
     private RFC3339DateFormat rfc3339DateFormat = new RFC3339DateFormat();
 
@@ -96,12 +102,6 @@ public class TodosApiControllerTest {
         todoFull.setTitle(this.title);
         return todoFull;
     }
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
-    private TodoRepository todoRepository;
 
     // Create
 
