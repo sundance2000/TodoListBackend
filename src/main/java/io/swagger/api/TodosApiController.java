@@ -1,7 +1,6 @@
 package io.swagger.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.ApiParam;
 import io.swagger.model.TodoBase;
 import io.swagger.model.TodoFull;
 import io.swagger.model.TodoList;
@@ -15,14 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.*;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import java.io.IOException;
-import java.time.OffsetDateTime;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-03-15T19:21:55.765Z")
 

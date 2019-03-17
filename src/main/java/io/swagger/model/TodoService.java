@@ -4,7 +4,6 @@ import com.google.common.collect.Maps;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -66,20 +65,19 @@ public class TodoService {
         if (offset == null) {
             offset = 0;
         }
-        int page = offset;
-        Pageable pageable = new OffsetPageRequest(0, limit, offset);
+        Pageable pageable = new OffsetPageRequest(limit, offset);
 
-        // Get todos with desired state
+        // Get todoList with desired state
         TodoState todoState = TodoState.getEnum(state);
-        List<TodoFull> todos = new ArrayList<>();
+        List<TodoFull> todoList = new ArrayList<>();
         if (todoState == TodoState.unfinished) {
-            todos = todoRepository.findAllByDone(false, pageable);
+            todoList = todoRepository.findAllByDone(false, pageable);
         } else if (todoState == TodoState.all) {
-            todos = todoRepository.findAll(pageable).getContent();
+            todoList = todoRepository.findAll(pageable).getContent();
         }
 
         // Convert result list of TodoFull items to list of TodoList items
-        return todos.stream().map(TodoList::new).collect(Collectors.toList());
+        return todoList.stream().map(TodoList::new).collect(Collectors.toList());
     }
 
     public boolean update(@NotNull Integer id, @NotNull TodoBase todoBase) {

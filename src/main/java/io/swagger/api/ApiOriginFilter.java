@@ -1,9 +1,8 @@
 package io.swagger.api;
 
-import java.io.IOException;
-
 import javax.servlet.*;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-03-15T19:21:55.765Z")
 

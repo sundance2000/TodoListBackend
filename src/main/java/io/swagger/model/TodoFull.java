@@ -1,19 +1,17 @@
 package io.swagger.model;
 
-import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.model.TodoBase;
-import java.time.OffsetDateTime;
-
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.validation.annotation.Validated;
 
-import javax.persistence.*;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import java.util.Objects;
 
 /**
  * The full todo with identifier used as response object.
