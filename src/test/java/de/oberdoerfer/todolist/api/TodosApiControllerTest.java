@@ -87,6 +87,8 @@ public class TodosApiControllerTest {
     @MockBean
     private TodoRepository todoRepository;
 
+    // Create
+
     @Test
     public void testCreateTodo() throws Exception {
         // 1. Arrange
@@ -103,6 +105,113 @@ public class TodosApiControllerTest {
                 .andExpect(jsonPath("done", is(this.done)))
                 .andExpect(jsonPath("dueDate", is(this.dueDate)))
                 .andExpect(jsonPath("title", is(this.title)));
+    }
+
+    @Test
+    public void testCreateTodoMissingDescription() throws Exception {
+        // 1. Arrange
+        this.todoBase.setDescription(null);
+        this.setUpTodoFull();
+        given(todoRepository.save(new TodoFull(todoBase))).willReturn(todoFull);
+        String json = this.objectMapper.writeValueAsString(todoBase);
+
+        // 2. Action
+        mockMvc.perform(post("/todos")
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("id", is(this.id)))
+            .andExpect(jsonPath("description").doesNotExist())
+            .andExpect(jsonPath("done", is(this.done)))
+            .andExpect(jsonPath("dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("title", is(this.title)));
+    }
+
+    @Test
+    public void testCreateTodoMissingDone() throws Exception {
+        // 1. Arrange
+        this.todoBase.setDone(null);
+        this.setUpTodoFull();
+        given(todoRepository.save(new TodoFull(todoBase))).willReturn(todoFull);
+        String json = this.objectMapper.writeValueAsString(todoBase);
+
+        // 2. Action
+        mockMvc.perform(post("/todos")
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testCreateTodoMissingDueDate() throws Exception {
+        // 1. Arrange
+        this.todoBase.setDueDate(null);
+        this.setUpTodoFull();
+        given(todoRepository.save(new TodoFull(todoBase))).willReturn(todoFull);
+        String json = this.objectMapper.writeValueAsString(todoBase);
+
+        // 2. Action
+        mockMvc.perform(post("/todos")
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testCreateTodoInvalidDate() throws Exception {
+        // 1. Arrange
+        String json = "{  \"title\" : \"clean fridge\",  \"description\" : \"It's a mess\",  \"dueDate\" : \"test\",  \"done\" : false}";
+
+        // 2. Action
+        mockMvc.perform(post("/todos")
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testCreateTodoMissingTitle() throws Exception {
+        // 1. Arrange
+        this.todoBase.setTitle(null);
+        this.setUpTodoFull();
+        given(todoRepository.save(new TodoFull(todoBase))).willReturn(todoFull);
+        String json = this.objectMapper.writeValueAsString(todoBase);
+
+        // 2. Action
+        mockMvc.perform(post("/todos")
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testCreateTodoTitleTooShort() throws Exception {
+        // 1. Arrange
+        this.todoBase.setTitle("");
+        this.setUpTodoFull();
+        given(todoRepository.save(new TodoFull(todoBase))).willReturn(todoFull);
+        String json = this.objectMapper.writeValueAsString(todoBase);
+
+        // 2. Action
+        mockMvc.perform(post("/todos")
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testCreateTodoTitleTooLong() throws Exception {
+        // 1. Arrange
+        this.todoBase.setTitle("1234567890123456789012345678901");
+        this.setUpTodoFull();
+        given(todoRepository.save(new TodoFull(todoBase))).willReturn(todoFull);
+        String json = this.objectMapper.writeValueAsString(todoBase);
+
+        // 2. Action
+        mockMvc.perform(post("/todos")
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
     }
 
 }
