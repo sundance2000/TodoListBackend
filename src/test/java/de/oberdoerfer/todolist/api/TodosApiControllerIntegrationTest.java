@@ -1,5 +1,6 @@
 package de.oberdoerfer.todolist.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -23,6 +24,7 @@ import java.time.ZoneOffset;
 import java.util.Date;
 
 import static org.hamcrest.Matchers.is;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -75,6 +77,16 @@ public class TodosApiControllerIntegrationTest {
         todoBase.setDone(this.done);
         todoBase.setDueDate(getOffsetDateTime(this.dueDate));
         todoBase.setTitle(this.title);
+    }
+
+    private int create() throws Exception {
+        String json = this.objectMapper.writeValueAsString(todoBase);
+        MvcResult result = mockMvc.perform(post("/todos/")
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andReturn();
+        String response = result.getResponse().getContentAsString();
+        return JsonPath.parse(response).read("id");
     }
 
     private void remove(int id) throws Exception {
@@ -204,6 +216,32 @@ public class TodosApiControllerIntegrationTest {
             .content(json)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
+    }
+
+    // Delete
+
+    @Test
+    public void testDeleteTodo() throws Exception {
+        // 1. Arrange
+        int id = this.create();
+
+        // 2. Action
+        mockMvc.perform(delete("/todos/" + id))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void testDeleteTodoNoId() throws Exception {
+        // 2. Action
+        mockMvc.perform(delete("/todos/"))
+            .andExpect(status().isMethodNotAllowed());
+    }
+
+    @Test
+    public void testDeleteTodoNotExisting() throws Exception {
+        // 2. Action
+        mockMvc.perform(delete("/todos/999"))
+            .andExpect(status().isNotFound());
     }
 
 }
