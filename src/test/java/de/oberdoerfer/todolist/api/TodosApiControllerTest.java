@@ -112,7 +112,7 @@ public class TodosApiControllerTest {
         String json = this.objectMapper.writeValueAsString(todoBase);
 
         // 2. Action
-        mockMvc.perform(post("/todos")
+        mockMvc.perform(post("/todos/")
                 .content(json)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
@@ -132,7 +132,7 @@ public class TodosApiControllerTest {
         String json = this.objectMapper.writeValueAsString(todoBase);
 
         // 2. Action
-        mockMvc.perform(post("/todos")
+        mockMvc.perform(post("/todos/")
             .content(json)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated())
@@ -150,7 +150,7 @@ public class TodosApiControllerTest {
         String json = this.objectMapper.writeValueAsString(todoBase);
 
         // 2. Action
-        mockMvc.perform(post("/todos")
+        mockMvc.perform(post("/todos/")
             .content(json)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
@@ -163,7 +163,7 @@ public class TodosApiControllerTest {
         String json = this.objectMapper.writeValueAsString(todoBase);
 
         // 2. Action
-        mockMvc.perform(post("/todos")
+        mockMvc.perform(post("/todos/")
             .content(json)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
@@ -175,7 +175,7 @@ public class TodosApiControllerTest {
         String json = "{  \"id\" : 1,  \"title\" : \"" + this.title + "\",  \"description\" : \"" + this.description + "\",  \"dueDate\" : \"test\",  \"done\" : " + this.done + "}";
 
         // 2. Action
-        mockMvc.perform(post("/todos")
+        mockMvc.perform(post("/todos/")
             .content(json)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
@@ -188,7 +188,7 @@ public class TodosApiControllerTest {
         String json = this.objectMapper.writeValueAsString(todoBase);
 
         // 2. Action
-        mockMvc.perform(post("/todos")
+        mockMvc.perform(post("/todos/")
             .content(json)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
@@ -201,7 +201,7 @@ public class TodosApiControllerTest {
         String json = this.objectMapper.writeValueAsString(todoBase);
 
         // 2. Action
-        mockMvc.perform(post("/todos")
+        mockMvc.perform(post("/todos/")
             .content(json)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
@@ -214,7 +214,7 @@ public class TodosApiControllerTest {
         String json = this.objectMapper.writeValueAsString(todoBase);
 
         // 2. Action
-        mockMvc.perform(post("/todos")
+        mockMvc.perform(post("/todos/")
             .content(json)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
@@ -230,6 +230,13 @@ public class TodosApiControllerTest {
         // 2. Action
         mockMvc.perform(delete("/todos/1"))
             .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void testDeleteTodoNoId() throws Exception {
+        // 2. Action
+        mockMvc.perform(delete("/todos/"))
+            .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
@@ -442,4 +449,138 @@ public class TodosApiControllerTest {
             .andExpect(jsonPath("$[1].title", is(this.title)));
     }
 
+    // Update
+
+    @Test
+    public void testUpdateTodo() throws Exception {
+        // 1. Arrange
+        given(todoRepository.findOne(1)).willReturn(todoFull);
+        given(todoRepository.save(new TodoFull(todoBase))).willReturn(todoFull);
+        String json = this.objectMapper.writeValueAsString(todoBase);
+
+        // 2. Action
+        mockMvc.perform(put("/todos/1")
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void testUpdateTodoNoId() throws Exception {
+        // 1. Arrange
+        String json = this.objectMapper.writeValueAsString(todoBase);
+
+        // 2. Action
+        mockMvc.perform(put("/todos/")
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isMethodNotAllowed());
+    }
+
+    @Test
+    public void testUpdateTodoNotExisting() throws Exception {
+        // 1. Arrange
+        given(todoRepository.findOne(1)).willReturn(null);
+        String json = this.objectMapper.writeValueAsString(todoBase);
+
+        // 2. Action
+        mockMvc.perform(put("/todos/1")
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testUpdateTodoMissingDescription() throws Exception {
+        // 1. Arrange
+        this.todoBase.setDescription(null);
+        this.setUpTodoFull();
+        given(todoRepository.findOne(1)).willReturn(todoFull);
+        given(todoRepository.save(new TodoFull(todoBase))).willReturn(todoFull);
+        String json = this.objectMapper.writeValueAsString(todoBase);
+
+        // 2. Action
+        mockMvc.perform(put("/todos/1")
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void testUpdateTodoMissingDone() throws Exception {
+        // 1. Arrange
+        this.todoBase.setDone(null);
+        String json = this.objectMapper.writeValueAsString(todoBase);
+
+        // 2. Action
+        mockMvc.perform(put("/todos/1")
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testUpdateTodoMissingDueDate() throws Exception {
+        // 1. Arrange
+        this.todoBase.setDueDate(null);
+        String json = this.objectMapper.writeValueAsString(todoBase);
+
+        // 2. Action
+        mockMvc.perform(put("/todos/1")
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testUpdateTodoInvalidDate() throws Exception {
+        // 1. Arrange
+        String json = "{  \"id\" : 1,  \"title\" : \"" + this.title + "\",  \"description\" : \"" + this.description + "\",  \"dueDate\" : \"test\",  \"done\" : " + this.done + "}";
+
+        // 2. Action
+        mockMvc.perform(put("/todos/1")
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testUpdateTodoMissingTitle() throws Exception {
+        // 1. Arrange
+        this.todoBase.setTitle(null);
+        String json = this.objectMapper.writeValueAsString(todoBase);
+
+        // 2. Action
+        mockMvc.perform(put("/todos/1")
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testUpdateTodoTitleTooShort() throws Exception {
+        // 1. Arrange
+        this.todoBase.setTitle("");
+        String json = this.objectMapper.writeValueAsString(todoBase);
+
+        // 2. Action
+        mockMvc.perform(put("/todos/1")
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testUpdateTodoTitleTooLong() throws Exception {
+        // 1. Arrange
+        this.todoBase.setTitle("1234567890123456789012345678901");
+        String json = this.objectMapper.writeValueAsString(todoBase);
+
+        // 2. Action
+        mockMvc.perform(put("/todos/1")
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+    }
+    
 }
