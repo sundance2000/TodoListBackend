@@ -81,7 +81,6 @@ public interface TodosApi {
         @ApiResponse(code = 404, message = "Todo not found.") })
     @RequestMapping(value = "/todos/{todo-id}",
         produces = { "application/json" }, 
-        consumes = { "application/json" },
         method = RequestMethod.DELETE)
     default ResponseEntity<Void> deleteTodo(@ApiParam(value = "The todo identifier.",required=true) @PathVariable("todo-id") Integer todoId) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -98,7 +97,6 @@ public interface TodosApi {
         @ApiResponse(code = 404, message = "Todo not found.") })
     @RequestMapping(value = "/todos/{todo-id}",
         produces = { "application/json" }, 
-        consumes = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<TodoFull> getTodo(@ApiParam(value = "The todo identifier.",required=true) @PathVariable("todo-id") Integer todoId) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -125,7 +123,6 @@ public interface TodosApi {
         @ApiResponse(code = 400, message = "Invalid query params", response = ErrorResponse.class, responseContainer = "List") })
     @RequestMapping(value = "/todos",
         produces = { "application/json" }, 
-        consumes = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<List<TodoList>> getTodos(@ApiParam(value = "Filters all or unfinished todos in the response", allowableValues = "all, unfinished", defaultValue = "unfinished") @Valid @RequestParam(value = "state", required = false, defaultValue="unfinished") String state,@Min(0) @Max(10) @ApiParam(value = "Maximal number of todos in the response", defaultValue = "5") @Valid @RequestParam(value = "limit", required = false, defaultValue="5") Integer limit,@Min(0) @Max(100) @ApiParam(value = "Offset for the todos in the response") @Valid @RequestParam(value = "offset", required = false) Integer offset) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
