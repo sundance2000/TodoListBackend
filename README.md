@@ -1,5 +1,6 @@
 # Swagger generated server
 
+[![Build Status](https://travis-ci.org/sundance2000/TodoListBackend.svg?branch=master)](https://travis-ci.org/sundance2000/TodoListBackend)  [![BCH compliance](https://bettercodehub.com/edge/badge/sundance2000/TodoListBackend?branch=master)](https://bettercodehub.com/results/sundance2000/TodoListBackend) [![codebeat badge](https://codebeat.co/badges/33b5fc2f-e54f-49b5-9d19-07958fa7fa47)](https://codebeat.co/projects/github-com-sundance2000-todolistbackend-master)
 Spring Boot Server 
 
 
