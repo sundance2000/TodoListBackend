@@ -24,6 +24,7 @@ import java.util.Date;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -212,6 +213,28 @@ public class TodosApiControllerTest {
             .content(json)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
+    }
+
+    // Delete
+
+    @Test
+    public void testDeleteTodo() throws Exception {
+        // 1. Arrange
+        given(todoRepository.findOne(1)).willReturn(todoFull);
+
+        // 2. Action
+        mockMvc.perform(delete("/todos/1"))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void testDeleteTodoNotExisting() throws Exception {
+        // 1. Arrange
+        given(todoRepository.findOne(1)).willReturn(null);
+
+        // 2. Action
+        mockMvc.perform(delete("/todos/1"))
+            .andExpect(status().isNotFound());
     }
 
 }
