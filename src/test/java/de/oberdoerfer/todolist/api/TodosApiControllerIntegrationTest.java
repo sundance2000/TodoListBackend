@@ -70,11 +70,11 @@ public class TodosApiControllerIntegrationTest {
     }
 
     private void setUpTodoBase() {
-        todoBase = new TodoBase();
-        todoBase.setDescription(this.description);
-        todoBase.setDone(this.done);
-        todoBase.setDueDate(getOffsetDateTime(this.dueDate));
-        todoBase.setTitle(this.title);
+        this.todoBase = new TodoBase();
+        this.todoBase.setDescription(this.description);
+        this.todoBase.setDone(this.done);
+        this.todoBase.setDueDate(getOffsetDateTime(this.dueDate));
+        this.todoBase.setTitle(this.title);
     }
 
     private int create(Boolean done) throws Exception {
@@ -103,7 +103,7 @@ public class TodosApiControllerIntegrationTest {
     @Test
     public void testCreateTodo() throws Exception {
         // 1. Arrange
-        String json = this.objectMapper.writeValueAsString(todoBase);
+        String json = this.objectMapper.writeValueAsString(this.todoBase);
 
         // 2. Action
         MvcResult result = mockMvc.perform(post("/todos/")
@@ -126,7 +126,7 @@ public class TodosApiControllerIntegrationTest {
     public void testCreateTodoMissingDescription() throws Exception {
         // 1. Arrange
         this.todoBase.setDescription(null);
-        String json = this.objectMapper.writeValueAsString(todoBase);
+        String json = this.objectMapper.writeValueAsString(this.todoBase);
 
         // 2. Action
         MvcResult result = mockMvc.perform(post("/todos/")
@@ -149,7 +149,7 @@ public class TodosApiControllerIntegrationTest {
     public void testCreateTodoMissingDone() throws Exception {
         // 1. Arrange
         this.todoBase.setDone(null);
-        String json = this.objectMapper.writeValueAsString(todoBase);
+        String json = this.objectMapper.writeValueAsString(this.todoBase);
 
         // 2. Action
         mockMvc.perform(post("/todos/")
@@ -162,7 +162,7 @@ public class TodosApiControllerIntegrationTest {
     public void testCreateTodoMissingDueDate() throws Exception {
         // 1. Arrange
         this.todoBase.setDueDate(null);
-        String json = this.objectMapper.writeValueAsString(todoBase);
+        String json = this.objectMapper.writeValueAsString(this.todoBase);
 
         // 2. Action
         mockMvc.perform(post("/todos/")
@@ -187,7 +187,7 @@ public class TodosApiControllerIntegrationTest {
     public void testCreateTodoMissingTitle() throws Exception {
         // 1. Arrange
         this.todoBase.setTitle(null);
-        String json = this.objectMapper.writeValueAsString(todoBase);
+        String json = this.objectMapper.writeValueAsString(this.todoBase);
 
         // 2. Action
         mockMvc.perform(post("/todos/")
@@ -200,7 +200,7 @@ public class TodosApiControllerIntegrationTest {
     public void testCreateTodoTitleTooShort() throws Exception {
         // 1. Arrange
         this.todoBase.setTitle("");
-        String json = this.objectMapper.writeValueAsString(todoBase);
+        String json = this.objectMapper.writeValueAsString(this.todoBase);
 
         // 2. Action
         mockMvc.perform(post("/todos/")
@@ -213,7 +213,7 @@ public class TodosApiControllerIntegrationTest {
     public void testCreateTodoTitleTooLong() throws Exception {
         // 1. Arrange
         this.todoBase.setTitle("1234567890123456789012345678901");
-        String json = this.objectMapper.writeValueAsString(todoBase);
+        String json = this.objectMapper.writeValueAsString(this.todoBase);
 
         // 2. Action
         mockMvc.perform(post("/todos/")
@@ -460,6 +460,166 @@ public class TodosApiControllerIntegrationTest {
         this.remove(id1);
         this.remove(id2);
         this.remove(id3);
+    }
+
+    // Update
+
+    @Test
+    public void testUpdateTodo() throws Exception {
+        // 1. Arrange
+        int id = this.create(false);
+        String json = this.objectMapper.writeValueAsString(this.todoBase);
+
+        // 2. Action
+        mockMvc.perform(put("/todos/" + id)
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+
+        // 4. Annihilate
+        this.remove(id);
+    }
+
+    @Test
+    public void testUpdateTodoNoId() throws Exception {
+        // 1. Arrange
+        String json = this.objectMapper.writeValueAsString(this.todoBase);
+
+        // 2. Action
+        mockMvc.perform(put("/todos/")
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isMethodNotAllowed());
+    }
+
+    @Test
+    public void testUpdateTodoNotExisting() throws Exception {
+        // 1. Arrange
+        String json = this.objectMapper.writeValueAsString(this.todoBase);
+
+        // 2. Action
+        mockMvc.perform(put("/todos/999")
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testUpdateTodoMissingDescription() throws Exception {
+        // 1. Arrange
+        int id = this.create(false);
+        this.todoBase.setDescription(null);
+        String json = this.objectMapper.writeValueAsString(this.todoBase);
+
+        // 2. Action
+        mockMvc.perform(put("/todos/" + id)
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+
+        // 4. Annihilate
+        this.remove(id);
+    }
+
+    @Test
+    public void testUpdateTodoMissingDone() throws Exception {
+        // 1. Arrange
+        int id = this.create(false);
+        this.todoBase.setDone(null);
+        String json = this.objectMapper.writeValueAsString(this.todoBase);
+
+        // 2. Action
+        mockMvc.perform(put("/todos/" + id)
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+
+        // 4. Annihilate
+        this.remove(id);
+    }
+
+    @Test
+    public void testUpdateTodoMissingDueDate() throws Exception {
+        // 1. Arrange
+        int id = this.create(false);
+        this.todoBase.setDueDate(null);
+        String json = this.objectMapper.writeValueAsString(this.todoBase);
+
+        // 2. Action
+        mockMvc.perform(put("/todos/" + id)
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+
+        // 4. Annihilate
+        this.remove(id);
+    }
+
+    @Test
+    public void testUpdateTodoInvalidDate() throws Exception {
+        // 1. Arrange
+        int id = this.create(false);
+        String json = "{  \"id\" : 1,  \"title\" : \"" + this.title + "\",  \"description\" : \"" + this.description + "\",  \"dueDate\" : \"test\",  \"done\" : " + this.done + "}";
+
+        // 2. Action
+        mockMvc.perform(put("/todos/" + id)
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+
+        // 4. Annihilate
+        this.remove(id);
+    }
+
+    @Test
+    public void testUpdateTodoMissingTitle() throws Exception {
+        // 1. Arrange
+        int id = this.create(false);
+        this.todoBase.setTitle(null);
+        String json = this.objectMapper.writeValueAsString(this.todoBase);
+
+        // 2. Action
+        mockMvc.perform(put("/todos/" + id)
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+
+        // 4. Annihilate
+        this.remove(id);
+    }
+
+    @Test
+    public void testUpdateTodoTitleTooShort() throws Exception {
+        // 1. Arrange
+        int id = this.create(false);
+        this.todoBase.setTitle("");
+        String json = this.objectMapper.writeValueAsString(this.todoBase);
+
+        // 2. Action
+        mockMvc.perform(put("/todos/" + id)
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+
+        // 4. Annihilate
+        this.remove(id);
+    }
+
+    @Test
+    public void testUpdateTodoTitleTooLong() throws Exception {
+        // 1. Arrange
+        int id = this.create(false);
+        this.todoBase.setTitle("1234567890123456789012345678901");
+        String json = this.objectMapper.writeValueAsString(this.todoBase);
+
+        // 2. Action
+        mockMvc.perform(put("/todos/" + id)
+            .content(json)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+
+        // 4. Annihilate
+        this.remove(id);
     }
 
 }
