@@ -1,6 +1,5 @@
 package de.oberdoerfer.todolist.api;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -24,9 +23,8 @@ import java.time.ZoneOffset;
 import java.util.Date;
 
 import static org.hamcrest.Matchers.is;
-import static org.mockito.BDDMockito.given;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -79,7 +77,13 @@ public class TodosApiControllerIntegrationTest {
         todoBase.setTitle(this.title);
     }
 
-    private int create() throws Exception {
+    private int create(Boolean done) throws Exception {
+        TodoBase todoBase = new TodoBase();
+        todoBase.setDone(done);
+        todoBase.setDescription(this.description);
+        todoBase.setDueDate(getOffsetDateTime(this.dueDate));
+        todoBase.setTitle(this.title);
+
         String json = this.objectMapper.writeValueAsString(todoBase);
         MvcResult result = mockMvc.perform(post("/todos/")
             .content(json)
@@ -223,7 +227,7 @@ public class TodosApiControllerIntegrationTest {
     @Test
     public void testDeleteTodo() throws Exception {
         // 1. Arrange
-        int id = this.create();
+        int id = this.create(true);
 
         // 2. Action
         mockMvc.perform(delete("/todos/" + id))
@@ -249,7 +253,7 @@ public class TodosApiControllerIntegrationTest {
     @Test
     public void testGetTodo() throws Exception {
         // 1. Arrange
-        int id = this.create();
+        int id = this.create(true);
 
         // 2. Action
         mockMvc.perform(get("/todos/" + id))
@@ -259,6 +263,9 @@ public class TodosApiControllerIntegrationTest {
             .andExpect(jsonPath("done", is(this.done)))
             .andExpect(jsonPath("dueDate", is(this.dueDate)))
             .andExpect(jsonPath("title", is(this.title)));
+
+        // 4. Annihilate
+        this.remove(id);
     }
 
     @Test
@@ -266,6 +273,193 @@ public class TodosApiControllerIntegrationTest {
         // 2. Action
         mockMvc.perform(get("/todos/999"))
             .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testGetTodosEmptyList() throws Exception {
+        // 2. Action
+        mockMvc.perform(get("/todos/"))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void testGetTodosUnfinished() throws Exception {
+        // 1. Arrange
+        int id1 = this.create(false);
+        int id2 = this.create(true);
+        int id3 = this.create(false);
+        int id4 = this.create(true);
+        int id5 = this.create(false);
+
+        // 2. Action
+        mockMvc.perform(get("/todos/?state=unfinished"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(3)))
+            .andExpect(jsonPath("$[0].id", is(id1)))
+            .andExpect(jsonPath("$[0].done", is(false)))
+            .andExpect(jsonPath("$[0].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[0].title", is(this.title)))
+            .andExpect(jsonPath("$[1].id", is(id3)))
+            .andExpect(jsonPath("$[1].done", is(false)))
+            .andExpect(jsonPath("$[1].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[1].title", is(this.title)))
+            .andExpect(jsonPath("$[2].id", is(id5)))
+            .andExpect(jsonPath("$[2].done", is(false)))
+            .andExpect(jsonPath("$[2].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[2].title", is(this.title)));
+
+        // 4. Annihilate
+        this.remove(id1);
+        this.remove(id2);
+        this.remove(id3);
+        this.remove(id4);
+        this.remove(id5);
+    }
+
+    @Test
+    public void testGetTodosAll() throws Exception {
+        // 1. Arrange
+        int id1 = this.create(false);
+        int id2 = this.create(true);
+        int id3 = this.create(false);
+
+        // 2. Action
+        mockMvc.perform(get("/todos/?state=all"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(3)))
+            .andExpect(jsonPath("$[0].id", is(id1)))
+            .andExpect(jsonPath("$[0].done", is(false)))
+            .andExpect(jsonPath("$[0].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[0].title", is(this.title)))
+            .andExpect(jsonPath("$[1].id", is(id2)))
+            .andExpect(jsonPath("$[1].done", is(true)))
+            .andExpect(jsonPath("$[1].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[1].title", is(this.title)))
+            .andExpect(jsonPath("$[2].id", is(id3)))
+            .andExpect(jsonPath("$[2].done", is(false)))
+            .andExpect(jsonPath("$[2].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[2].title", is(this.title)));
+
+        // 4. Annihilate
+        this.remove(id1);
+        this.remove(id2);
+        this.remove(id3);
+    }
+
+    @Test
+    public void testGetTodosNoState() throws Exception {
+        // 1. Arrange
+        int id1 = this.create(false);
+        int id2 = this.create(true);
+        int id3 = this.create(false);
+        int id4 = this.create(true);
+        int id5 = this.create(false);
+
+        // 2. Action
+        mockMvc.perform(get("/todos/"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(3)))
+            .andExpect(jsonPath("$[0].id", is(id1)))
+            .andExpect(jsonPath("$[0].done", is(false)))
+            .andExpect(jsonPath("$[0].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[0].title", is(this.title)))
+            .andExpect(jsonPath("$[1].id", is(id3)))
+            .andExpect(jsonPath("$[1].done", is(false)))
+            .andExpect(jsonPath("$[1].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[1].title", is(this.title)))
+            .andExpect(jsonPath("$[2].id", is(id5)))
+            .andExpect(jsonPath("$[2].done", is(false)))
+            .andExpect(jsonPath("$[2].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[2].title", is(this.title)));
+
+        // 4. Annihilate
+        this.remove(id1);
+        this.remove(id2);
+        this.remove(id3);
+        this.remove(id4);
+        this.remove(id5);
+    }
+
+    @Test
+    public void testGetTodosLimit() throws Exception {
+        // 1. Arrange
+        int id1 = this.create(false);
+        int id2 = this.create(false);
+        int id3 = this.create(false);
+        int id4 = this.create(false);
+        int id5 = this.create(false);
+
+        // 2. Action
+        mockMvc.perform(get("/todos/?limit=2"))
+            .andExpect(status().isPartialContent())
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[0].id", is(id1)))
+            .andExpect(jsonPath("$[0].done", is(false)))
+            .andExpect(jsonPath("$[0].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[0].title", is(this.title)))
+            .andExpect(jsonPath("$[1].id", is(id2)))
+            .andExpect(jsonPath("$[1].done", is(false)))
+            .andExpect(jsonPath("$[1].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[1].title", is(this.title)));
+
+        // 4. Annihilate
+        this.remove(id1);
+        this.remove(id2);
+        this.remove(id3);
+        this.remove(id4);
+        this.remove(id5);
+    }
+
+    @Test
+    public void testGetTodosOffset() throws Exception {
+        // 1. Arrange
+        int id1 = this.create(false);
+        int id2 = this.create(false);
+        int id3 = this.create(false);
+
+        // 2. Action
+        mockMvc.perform(get("/todos/?offset=1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[0].id", is(id2)))
+            .andExpect(jsonPath("$[0].done", is(false)))
+            .andExpect(jsonPath("$[0].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[0].title", is(this.title)))
+            .andExpect(jsonPath("$[1].id", is(id3)))
+            .andExpect(jsonPath("$[1].done", is(false)))
+            .andExpect(jsonPath("$[1].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[1].title", is(this.title)));
+
+        // 4. Annihilate
+        this.remove(id1);
+        this.remove(id2);
+        this.remove(id3);
+    }
+
+    @Test
+    public void testGetTodosRemaining() throws Exception {
+        // 1. Arrange
+        int id1 = this.create(false);
+        int id2 = this.create(false);
+        int id3 = this.create(false);
+
+        // 2. Action
+        mockMvc.perform(get("/todos/?limit=2"))
+            .andExpect(status().isPartialContent())
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[0].id", is(id1)))
+            .andExpect(jsonPath("$[0].done", is(false)))
+            .andExpect(jsonPath("$[0].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[0].title", is(this.title)))
+            .andExpect(jsonPath("$[1].id", is(id2)))
+            .andExpect(jsonPath("$[1].done", is(false)))
+            .andExpect(jsonPath("$[1].dueDate", is(this.dueDate)))
+            .andExpect(jsonPath("$[1].title", is(this.title)));
+
+        // 4. Annihilate
+        this.remove(id1);
+        this.remove(id2);
+        this.remove(id3);
     }
 
 }

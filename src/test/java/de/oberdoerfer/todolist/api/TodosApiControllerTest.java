@@ -351,7 +351,7 @@ public class TodosApiControllerTest {
         // 1. Arrange
         List<TodoFull> todoFullList = new ArrayList<>();
         todoFullList.add(this.generateTodoFull(1, false));
-        todoFullList.add(this.generateTodoFull(2, true));
+        todoFullList.add(this.generateTodoFull(2, false));
         todoFullList.add(this.generateTodoFull(3, false));
         Pageable pageable = new OffsetPageRequest(5, 0);
         PageImpl<TodoFull> page = new PageImpl<>(todoFullList);
@@ -366,7 +366,7 @@ public class TodosApiControllerTest {
             .andExpect(jsonPath("$[0].dueDate", is(this.dueDate)))
             .andExpect(jsonPath("$[0].title", is(this.title)))
             .andExpect(jsonPath("$[1].id", is(2)))
-            .andExpect(jsonPath("$[1].done", is(true)))
+            .andExpect(jsonPath("$[1].done", is(false)))
             .andExpect(jsonPath("$[1].dueDate", is(this.dueDate)))
             .andExpect(jsonPath("$[1].title", is(this.title)))
             .andExpect(jsonPath("$[2].id", is(3)))
